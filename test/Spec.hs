@@ -30,22 +30,20 @@ instance Reifies s Integer => Num (Modulus s) where
   fromInteger i = Mod $ i `mod` reflect (Proxy :: Proxy s)
   negate (Mod n) = Mod (reflect (Proxy :: Proxy s) - n)
 
-fromInteger' :: Reifies n Integer => Proxy n -> Integer -> Modulus n
-fromInteger' _ = fromInteger
-
-program :: (ReifyComparable s t, Reifies s Integer, Reifies t Integer)
-        => Proxy s -> Proxy t -> Integer
-program tokenn tokenm = case testSameReification tokenn tokenm of
-  Just Refl -> unMod (fromInteger' tokenn 27 + fromInteger' tokenm 29)
-  Nothing -> -1
+program :: forall s t. (ReifyComparable s t, Reifies s Integer, Reifies t Integer)
+        => Proxy s -> Modulus s -> Proxy t -> Modulus t -> Integer
+program tokenn valuen tokenm valuem =
+  case testSameReification tokenn tokenm of
+    Just Refl -> unMod (valuen + valuem)
+    Nothing -> -1
 
 -- Now, for some example uses. Note we *always* use 'doReify' and 'testSameReification', a single way to reflect values
 -- of different types.
-testIntegerCompare :: Integer -> Integer -> Integer
-testIntegerCompare n m =
+testIntegerCompare :: Integer -> Integer -> Integer -> Integer -> Integer
+testIntegerCompare n m k l =
   reify n $ \tokenn ->
     reify m $ \tokenm ->
-      program tokenn tokenm
+      program tokenn (fromInteger k) tokenm (fromInteger l)
 
 testCompareTypeable :: Float -> Float -> Bool
 testCompareTypeable f g =
@@ -55,7 +53,7 @@ testCompareTypeable f g =
 
 main :: IO ()
 main = defaultMain $ testGroup "simple reflection"
-  [ testCase "reflecting the same value is detected" $ testIntegerCompare 42 42 @?= (27 + 29) `mod` 42
-  , testCase "reflecting different values is detected" $ testIntegerCompare 42 43 @?= -1
+  [ testCase "reflecting the same value is detected" $ testIntegerCompare 42 42 27 29 @?= (27 + 29) `mod` 42
+  , testCase "reflecting different values is detected" $ testIntegerCompare 42 43 27 29 @?= -1
   , testCase "reflecting typeable works" $ testCompareTypeable 4.2 (-12.3) @? "token comparison is wrong"
   ]
