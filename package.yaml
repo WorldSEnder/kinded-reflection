@@ -1,0 +1,41 @@
+name:                kinded-reflection
+version:             0.1.0.0
+github:              "WorldSEnder/kinded-reflection"
+license:             BSD3
+author:              "Martin Molzer"
+maintainer:          "ga65guy@mytum.de"
+copyright:           "2021 Martin Molzer"
+
+extra-source-files:
+- README.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/WorldSEnder/kinded-reflection#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- reflection >= 2.1.4
+- ghc-prim >= 0.6
+
+library:
+  source-dirs: src
+
+tests:
+  kinded-reflection-tests:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - kinded-reflection
+    - HUnit >= 1.6.1 && < 2
+    - tasty >= 1.2
+    - tasty-hunit
